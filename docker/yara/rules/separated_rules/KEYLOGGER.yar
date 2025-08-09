@@ -1,0 +1,97 @@
+rule DEADBITS_APT34_LONGWATCH : APT34 WINMALWARE KEYLOGGER FILE
+{
+	meta:
+		description = "No description has been set in the source file - DeadBits"
+		author = "Adam Swanda"
+		id = "74a6a408-2f0e-567d-8968-c304d258df81"
+		date = "2019-07-22"
+		modified = "2019-07-22"
+		reference = "https://www.fireeye.com/blog/threat-research/2019/07/hard-pass-declining-apt34-invite-to-join-their-professional-network.html"
+		source_url = "https://github.com/deadbits/yara-rules//blob/d002f7ecee23e09142a3ac3e79c84f71dda3f001/rules/APT34_LONGWATCH.yara#L1-L43"
+		license_url = "N/A"
+		logic_hash = "8f9ed228325800baea3a2874c71337709c04d93419d4d56821a791dbce6f4582"
+		score = 75
+		quality = 78
+		tags = "APT34, WINMALWARE, KEYLOGGER, FILE"
+		Description = "APT34 Keylogger"
+
+	strings:
+		$log = "c:\\windows\\temp\\log.txt" ascii fullword
+		$clipboard = "---------------CLIPBOARD------------" ascii fullword
+		$func0 = "\"Main Invoked.\"" ascii fullword
+		$func1 = "\"Main Returned.\"" ascii fullword
+		$logger3 = ">---------------------------------------------------" ascii fullword
+		$logger4 = "[ENTER]" ascii fullword
+		$logger5 = "[CapsLock]" ascii fullword
+		$logger6 = "[CRTL]" ascii fullword
+		$logger7 = "[PAGE_UP]" ascii fullword
+		$logger8 = "[PAGE_DOWN]" ascii fullword
+		$logger9 = "[HOME]" ascii fullword
+		$logger10 = "[LEFT]" ascii fullword
+		$logger11 = "[RIGHT]" ascii fullword
+		$logger12 = "[DOWN]" ascii fullword
+		$logger13 = "[PRINT]" ascii fullword
+		$logger14 = "[PRINT SCREEN]" ascii fullword
+		$logger15 = "[INSERT]" ascii fullword
+		$logger16 = "[SLEEP]" ascii fullword
+		$logger17 = "[PAUSE]" ascii fullword
+		$logger18 = "[TAB]" ascii fullword
+		$logger19 = "[ESC]" ascii fullword
+		$logger20 = "[DEL]" ascii fullword
+		$logger21 = "[ALT]" ascii fullword
+
+	condition:
+		uint16( 0 ) == 0x5a4d and $log and all of ( $func* ) and all of ( $logger* ) and $clipboard
+}
+
+rule TRELLIX_ARC_MALW_Thiefquest : KEYLOGGER BACKDOOR RANSOMWARE FILE
+{
+	meta:
+		description = "Rule to detect the Evilquest/ThiefQuest malware"
+		author = "McAfee ATR Team"
+		id = "09b074f7-6899-574d-a7d6-4414509aaa78"
+		date = "2020-07-09"
+		modified = "2020-10-12"
+		reference = "https://www.bleepingcomputer.com/news/security/thiefquest-ransomware-is-a-file-stealing-mac-wiper-in-disguise/"
+		source_url = "https://github.com/advanced-threat-research/Yara-Rules//blob/1919562a59f190bda60c982424f6a24c542ee3e0/ransomware/RANSOM_thiefquest.yar#L1-L46"
+		license_url = "https://github.com/advanced-threat-research/Yara-Rules//blob/1919562a59f190bda60c982424f6a24c542ee3e0/LICENSE"
+		hash = "5a024ffabefa6082031dccdb1e74a7fec9f60f257cd0b1ab0f698ba2a5baca6b"
+		logic_hash = "d40a466b12188d545d3fbe2c9d7e3685dde1250ae1f25df2a72cdf93c470ae25"
+		score = 75
+		quality = 68
+		tags = "KEYLOGGER, BACKDOOR, RANSOMWARE, FILE"
+		rule_version = "v1"
+		malware_type = "keylogger, backdoor, ransomware"
+		actor_type = "Cybercrime"
+		malware_family = "Ransom:OSX/ThiefQuest"
+
+	strings:
+		$pattern_0 = { 01c1 48 83c102 48 }
+		$pattern_1 = { 8c1471 80c1c1 98 1c8c }
+		$pattern_2 = { d8974f0dc89a 9f c9 9adf70cd595390 }
+		$pattern_3 = { d897c56f028c 2393a0a42e92 8ea2c27affc2 f8 }
+		$pattern_4 = { 477006 baa6a1cb82 ae f9 e8???????? d8a32bd0d519 }
+		$pattern_5 = { d898ab5c757b 2f f26f 5d }
+		$pattern_6 = { bc007a846b 2b54adaf 93 35eddf38e6 cdd0 b246 }
+		$pattern_7 = { ae 49b00e 01d1 45da611b 44839db656691674 }
+		$pattern_8 = { 01c1 48 83c101 48 }
+		$pattern_9 = { 6be3c6 5c 99 ae ed bf370e2f47 }
+		$pattern_10 = { fd d7 43bd18fd6f06 7937 fa }
+		$pattern_11 = { 01c2 48 83c201 bf01000000 }
+		$pattern_12 = { d89825ed4469 29f1 5c e12d }
+		$pattern_13 = { d8992062f7f9 73ff 90 085fc6 }
+		$pattern_14 = { 01c1 6689ca 668995cefeffff e9???????? }
+		$pattern_15 = { 01c1 41 89c8 44 }
+		$pattern_16 = { d89935c487a7 bcdffa587c be6cadbb3c 185fc4 }
+		$pattern_17 = { 01c1 48 8b75a8 48 }
+		$pattern_18 = { 0000 48 8945f8 e9???????? }
+		$pattern_19 = { d89959d6472d a2???????? 3525c7eec9 95 }
+		$pattern_20 = { 01c2 48 83c203 bf01000000 }
+		$pattern_21 = { 4a7888 ab 23e7 cf 11f3 }
+		$pattern_22 = { d8982fbf222d 49 92 1d25b42bba }
+		$pattern_23 = { e2d7 8437 6b4696d9 92 9d a6 }
+
+	condition:
+		7 of them and filesize < 124322606
+}
+

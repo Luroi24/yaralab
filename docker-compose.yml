@@ -7,16 +7,14 @@ services:
       - "8080:8080"
     volumes:
       - ./data:/data
-    environment:
-      - YARA_RULES_PATH=/data/rules
-  db:
-    build: ./docker/db
-    container_name: yara_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./data/db:/var/lib/mysql
-    environment:
-      - MARIADB_USER=yara
-      - MARIADB_PASSWORD=yara_password
-      - MARIADB_DATABASE=yara_db
+  # db:
+  #   build: ./docker/db
+  #   container_name: yara_db
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - ./data/db:/var/lib/mysql
+  #   environment:
+  #     - MARIADB_USER=yara
+  #     - MARIADB_PASSWORD=yara_password
+  #     - MARIADB_DATABASE=yara_db
