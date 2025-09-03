@@ -1,1 +1,1 @@
-Yaralab - Portable tool to run yara rules on files
+** Yaralab - Portable tool to run yara rules on files **
