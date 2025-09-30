@@ -34,13 +34,13 @@ def parse_args():
     parser.add_argument(
         '-i', '--input',
         type=str,
-        #required=True,
+        required=True,
         help='Path to the input file containing YARA rules or signatures.'
     )
     parser.add_argument(
         '-o', '--output',
         type=str,
-        #required=True,
+        default="outputs/",
         help='Path to the output file where results will be saved.'
     )
     parser.add_argument(
@@ -48,6 +48,13 @@ def parse_args():
         type=str,
         required=False,
         help='Label for the yara rules to be processed. If not provided, all rules will be processed.'
+    )
+    parser.add_argument(
+        '-dn', '--dName',
+        type=str,
+        required=False,
+        default="yara_container",
+        help='Name for the container. Defaulted to "yara_container"'
     )
 
     return parser.parse_args()
@@ -64,18 +71,48 @@ def create_directories():
             os.makedirs(directory)
             logging.info(f"Created directory: {directory}")
 
+def get_name_from_path(file_path: str) -> str:
+    """
+    Extract the file name from a given file path.
+    Args:
+        file_path (str): The full path to the file.
+    Returns:
+        str: The extracted file name.
+    """
+
+    if os.path.isdir(file_path):
+        return os.path.basename(os.path.normpath(file_path))
+    elif os.path.isfile(file_path):
+        return os.path.basename(file_path)
 
 if __name__ == "__main__":
     args = parse_args()
     create_directories()
 
     docker_handler = Docker_Handler()
-    docker_handler.run_container(image_name="yara", container_name="test", files_to_analyze_path=args.input)
+    docker_handler.run_container(
+        image_name="yara",
+        container_name=args.dName,
+    )
 
     docker_handler.run_cmd(
-        container_name="test",
-        cmd=f"echo \"hola mundo\""
+        container_name=args.dName,
+        cmd=f"python3 /data/run-rules.py -f {args.input} -gt"
+    )
+
+    docker_handler.get_file_from_container(
+        file_path="/rules/output/results.json",
+        output_path=f"{args.output}/results.json",
+        container_name=args.dName
+    )
+
+    docker_handler.run_cmd(
+        container_name=args.dName,
+        cmd=f"rm -rf /rules/output"
     )
 
     logging.info(f"Input file: {args.input}")
     logging.info(f"Output file: {args.output}")
+
+    # Pause here
+    #sleep(1000)

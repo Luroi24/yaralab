@@ -3,8 +3,8 @@ FROM debian:bookworm-slim
 # Install YARA and its dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        automake libtool make gcc pkg-config \
-        libssl-dev libmagic-dev git ca-certificates && \
+    automake libtool make gcc pkg-config \
+    libssl-dev libmagic-dev git ca-certificates && \
     git clone https://github.com/VirusTotal/yara.git && \
     cd yara && \
     git submodule update --init --recursive && \
