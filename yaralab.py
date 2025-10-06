@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument(
         '-o', '--output',
         type=str,
-        default="outputs/",
+        default="outputs",
         help='Path to the output file where results will be saved.'
     )
     parser.add_argument(
@@ -84,6 +84,35 @@ def get_name_from_path(file_path: str) -> str:
         return os.path.basename(os.path.normpath(file_path))
     elif os.path.isfile(file_path):
         return os.path.basename(file_path)
+    
+def simple_test(run_string: str = "", output:str="outputs", dName: str = "yara_container"):
+    """
+    Simple test function to demonstrate Docker container management.
+    This function creates a Docker container, runs a command, and retrieves a file.
+    """
+    create_directories()
+
+    docker_handler = Docker_Handler()
+    docker_handler.run_container(
+        image_name="yara",
+        container_name=dName,
+    )
+
+    docker_handler.run_cmd(
+        container_name=dName,
+        cmd=run_string
+    )
+
+    docker_handler.get_file_from_container(
+        file_path="/rules/output/results.json",
+        output_path=f"{output}/results.json",
+        container_name=dName
+    )
+
+    docker_handler.run_cmd(
+        container_name=dName,
+        cmd=f"rm -rf /rules/output"
+    )
 
 if __name__ == "__main__":
     args = parse_args()
