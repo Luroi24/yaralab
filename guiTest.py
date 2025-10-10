@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-"""
-file_copy_gui.py
-
-PyQt6 GUI to accept files (via button or drag & drop) and copy/move them to a chosen directory.
-Includes an in-list visual indicator that the widget supports drag & drop.
-Fixed: safe removal of items to avoid crashes when removing everything.
-"""
-
 import os
 import sys
 import shutil
@@ -342,6 +333,7 @@ class MainWindow(QWidget):
         if not run_name:
             run_name = self.get_default_run_name()
         self.run_name = run_name
+        print(f"Run destination: {self.dest_dir}, run name: {self.run_name}")
         dest_path = os.path.join(self.dest_dir, run_name)
         try:
             os.makedirs(dest_path, exist_ok=True)
@@ -364,6 +356,7 @@ class MainWindow(QWidget):
         self.btn_cancel.setEnabled(True)
 
         self.start_analysis()
+        self.set_destination(REMOTE_FILES_DIR)
 
     def start_analysis(self):
         #QMessageBox.information(self, "Analysis", "Starting analysis... (not implemented)")
