@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cic-yaralab-deployment
+  labels:
+    app: yaralab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yaralab
+  template:
+    metadata:
+      labels:
+        app: yaralab
+    spec:
+      containers:
+      - name: yaralab
+        image: luroi/cic_yaralab
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: yaralab-data
+          mountPath: /data
+      volumes:
+      - name: yaralab-data
+        emptyDir: {}

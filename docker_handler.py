@@ -6,11 +6,13 @@ import tarfile
 import os
 import io
 import time
+import subprocess
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] - %(message)s')
 VOLUME_HOST_PATH = os.path.abspath("./remote")
 VOLUME_CONTAINER_PATH = "/data"
+COMPOSE_FILE = "docker-compose.yml"
 
 def make_tarfile(src_path, arcname):
     tar_stream = io.BytesIO()
@@ -22,64 +24,60 @@ def make_tarfile(src_path, arcname):
 
 class Docker_Handler:
     """
-    A class to handle Docker operations for YaraLab.
+    A class to handle Docker operations for YaraLab using Docker Compose.
     This class can be expanded with methods to build, run, and manage Docker containers.
     """
 
     containers = []
+    _compose_started = False
 
     def __init__(self):
         logging.info("Docker_Handler initialized. Ready to manage Docker operations.")
         self.docker_client = docker.from_env()
+        self.compose_file = COMPOSE_FILE
+    
+    def start_compose(self):
+        """Start Docker Compose V2 services if not already started."""
+        if not Docker_Handler._compose_started:
+            logging.info("Starting Docker Compose services...")
+            try:
+                subprocess.run(
+                    ["docker", "compose", "-f", self.compose_file, "up", "-d"],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
+                Docker_Handler._compose_started = True
+                logging.info("Docker Compose services started successfully.")
+            except subprocess.CalledProcessError as e:
+                logging.error(f"Failed to start Docker Compose: {e.stderr}")
+                raise
+        else:
+            logging.info("Docker Compose services already running.")
 
     def run_container(self, image_name:str, container_name:str):
         """
-        Run a Docker container with the specified image and command.
+        Run a Docker container using Docker Compose.
         Args:
             image_name (str): Name of the Docker image to run.
-            command (str): Command to execute in the Docker container.
+            container_name (str): Name of the container (used for compose services).
         """
-
         logging.info(f"Running Docker container with image: {image_name}.")
+        
+        # Start compose services
+        self.start_compose()
+        
+        # Get the container from the running compose services
         try:
-            self.docker_client.images.get(image_name)
-        except docker.errors.ImageNotFound:
-            logging.error(f"Docker image '{image_name}' not found. Starting build process.")
-            try:
-                self.build_image(image_name, "latest")
-            except Exception as e:
-                logging.error(f"Failed to build Docker image '{image_name}': {e}")
+            container = self.docker_client.containers.get(container_name)
+            logging.info(f"Found container '{container_name}' from Docker Compose.")
+            self.start_container(image_name, container)
+        except docker.errors.NotFound:
+            logging.error(f"Container '{container_name}' not found in Docker Compose services.")
+            raise
         except Exception as e:
-            logging.error(f"Error accessing Docker image '{image_name}': {e}")
-
-        finally:
-            try:
-                container = self.docker_client.containers.get(container_name)
-                container.start()
-                logging.info(f"Found existing container '{container_name}'. Starting it.")
-                self.start_container(image_name, container)
-            except docker.errors.NotFound:
-                logging.info(f"Container '{container_name}' not found. Creating a new one and starting it.")
-                
-                container = self.docker_client.containers.run(
-                    image_name,
-                    volumes={
-                        VOLUME_HOST_PATH: {
-                            'bind': VOLUME_CONTAINER_PATH,
-                            'mode': 'rw'
-                        }
-                    },
-                    name=container_name,
-                    detach=True, command="tail -f /dev/null"
-                ) 
-                # TODO: Check if this is correct of if I should add a ENTRYPOINT in the Dockerfile
-
-                # Script to run yara
-                logging.info(f"New container '{container_name}' started with ID: {container.id}")
-
-                self.start_container(image_name, container)
-            except Exception as e:
-                logging.error(f"Failed to start or create container '{container_name}': {e}")
+            logging.error(f"Failed to access container '{container_name}': {e}")
+            raise
 
     def build_image(self, image_name:str, tag:str):
         """
@@ -101,7 +99,11 @@ class Docker_Handler:
             image_name (str): Name of the Docker image to run.
         """
         try:
-            self.containers.append(container)
+            if container not in self.containers:
+                self.containers.append(container)
+                logging.info(f"Added container {container.name} to managed containers list")
+            else:
+                logging.info(f"Container {container.name} already in managed containers list")
 
             logging.info(f"Docker container started with ID: {container.id}")
             return container.id
@@ -110,15 +112,20 @@ class Docker_Handler:
 
     def stop_containers(self):
         """
-        Stop all running Docker containers managed by this handler.
+        Stop all running Docker containers managed by this handler using Docker Compose V2.
         """
-        logging.info("Stopping all running Docker containers.")
-        for container in self.containers:
-            try:
-                container.stop()
-                logging.info(f"Stopped Docker container with ID: {container.id}")
-            except docker.errors.APIError as e:
-                logging.error(f"Failed to stop Docker container with ID '{container.id}': {e}")
+        logging.info("Stopping Docker Compose services.")
+        try:
+            subprocess.run(
+                ["docker", "compose", "-f", self.compose_file, "stop"],
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            Docker_Handler._compose_started = False
+            logging.info("Docker Compose services stopped successfully.")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to stop Docker Compose: {e.stderr}")
 
     def get_file_from_container(self, file_path: str, output_path: str, container_name: str):
         """

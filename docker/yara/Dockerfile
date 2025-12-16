@@ -22,16 +22,13 @@ RUN apt-get update && \
 # Set up python3, pip3, yara-python
 RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
-    pip3 install yara-python --break-system-packages
+    pip3 install yara-python  pymongo --break-system-packages
 
 # Set the working directory
 WORKDIR /rules
 
-# Copy YARA rules into the container
-COPY rules/raw/*.yar /rules/
-
-# Expose port if necessary (not needed for local rule matching)
-EXPOSE 3333
+# Leave the container running to allow interaction
+CMD ["tail", "-f", "/dev/null"]
 
 # Entrypoint to yara (optional, uncomment if you want direct execution)
 # ENTRYPOINT ["yara"]
