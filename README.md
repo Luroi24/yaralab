@@ -9,12 +9,12 @@ PYFA is a portable option to run various yara rules into one or many files stati
 
 ## Pre requisites
 
-- Have docker engine installed in your machine
+- Have Docker Engine installed on your machine
 - Have a python3 version installed with venv
 
 ## Getting started
 
-To deploy this project run the following
+To deploy this project, run the following
 
 - [Optional] Create a virtual environment and activate it. While this isn't fully necessary, it is highly recommended to use an environment to use this tool.
 ```bash
@@ -27,10 +27,12 @@ python3 -m venv .env
 source ./.env/bin/activate
 ```
 
-- Install the necessary python libraries
+- Install the necessary Python libraries
 ```bash
 pip install -r requirements.txt
 ```
+
+- Make sure your Docker engine is up and running before trying to use PYFA
 
 ## Usage/Examples
 
@@ -41,11 +43,11 @@ Using the gui is the easiest option to run this tool. The only thing you have to
 ```bash
 python3 ./gui.py
 ```
-while the environment is active and you can start using it from the get go. You can drag and drop files into the window, specify a name for the run, use either compiled rules or get them from the db. If you choose the latter, you can also select one or many of the tags loaded in the db. You can load more rules using the CLI.
+while the environment is active, and you can start using it from the get-go. You can drag and drop files into the window, specify a name for the run, use either compiled rules or get them from the db. If you choose the latter, you can also select one or many of the tags loaded in the DB. You can load more rules using the CLI.
 
 ### CLI
 
-To use the CLI version of PYFA you need to consider the following:
+To use the CLI version of PYFA, you need to consider the following:
 ```bash
 usage: yaralab.py [-h] -i INPUT [-o OUTPUT] [-gt | --group-by-tags | --no-group-by-tags] [-dn DNAME]
                   [-db | --dataBase | --no-dataBase] [-ldb LOAD_DB] [-t [TAGS ...]]
